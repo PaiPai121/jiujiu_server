@@ -251,10 +251,12 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
     # 这里假设我们要选择“2024年9月30日”
     # 你需要根据实际的日期选择器结构进行调整
     # 使用 WebDriverWait 等待显示月份的元素加载（最多等待10秒）
+    new_print("find CalendarHeader")
     wait = WebDriverWait(driver, 10)
     month_label = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiPickersCalendarHeader-label")))
     # 根据空格进行分割
     month, year = month_label.text.split()
+    new_print("month : " + str(month) + " year :" + str(year))
     # 循环直到当前月份与目标月份匹配
     while not month == life[1]:
         # 如果月份不匹配，点击“上一月”按钮
