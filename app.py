@@ -33,15 +33,46 @@ def api_query():
     })
     
     
+    
+def split_date(date_str):
+    # 去除年、月、日并将其分割为列表
+    date_str = date_str.replace('年', '-').replace('月', '-').replace('日', '')
+    date_list = date_str.split('-')
+    
+    # 将分割后的结果转换为对应的年月日
+    year = date_list[0]
+    month = date_list[1]
+    day = date_list[2]
+    
+    return [year, month, day]
 @app.route('/api/renew', methods=['POST'])
 def api_renew():
     new_print("api_renew")
     data = request.get_json()
     apikey = data.get('apikey')
     dollar = data.get('dollar')
-    date = data.get('date')  # 假设日期格式为 2024年12月31日
-
-    new_print("Received renew request with API Key:" + apikey+ " Dollar:"+ dollar+ " Date:"+ date)
+    date = split_date(data.get('date'))  # 假设日期格式为 2024年12月31日
+    date = date +["0","0"]
+    month_map = {
+    "1": "一月",
+    "2": "二月",
+    "3": "三月",
+    "4": "四月",
+    "5": "五月",
+    "6": "六月",
+    "7": "七月",
+    "8": "八月",
+    "9": "九月",
+    "10": "十月",
+    "11": "十一月",
+    "12": "十二月"
+    }
+    try:
+        date[1] = month_map[date[1]]
+    except:
+        pass
+    new_print("Received renew request with API Key:" + apikey+ " Dollar:"+ str(dollar))
+    new_print("date:"+data.get('date'))
 
     # 检查必要的参数是否提供
     if not apikey:
@@ -53,8 +84,8 @@ def api_renew():
 
     try:
         # 调用 change_token_dollar_and_life 函数
-        result = change_token_dollar_and_life(driver, apikey, dollar, date)
-        new_print("Change token result:"+ result)
+        result = change_token_dollar_and_life(driver, key = apikey, dollor=dollar, life=date)
+        new_print("Change token result:"+ str(result))
 
         # 根据函数返回的结果，返回相应的消息
         if result == 1:

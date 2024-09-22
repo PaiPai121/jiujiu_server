@@ -333,9 +333,15 @@ def change_token_dollar_and_life(driver,dollor = 0,life = ["2024","十二月","3
     4: no key
     """
     # 检查输入
-    if (dollor < 0.5):
-        new_print("no dollar")
-        return 2
+    try:
+        if (dollor < 0.5):
+            new_print("no dollar")
+            return 2
+    except:
+        dollor = float(dollor)
+        if (dollor < 0.5):
+            new_print("no dollar")
+            return 2
     # 检查日期
     if(not check_data_after_now(life)):
         new_print("no date")
