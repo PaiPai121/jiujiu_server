@@ -7,15 +7,16 @@ CORS(app)
 
 @app.route('/api/query', methods=['POST'])
 def api_query():
+    new_print("api query")
     data = request.get_json()
     apikey = data.get('apikey')
-    print(apikey)
+    new_print(apikey)
 
     if not apikey:
         return jsonify({"error": "API Key is required"}), 400
     # 调用 get_token_info 函数
     token_info = get_token_info(driver,apikey)
-    print("get token info " + str(token_info))
+    new_print("get token info " + str(token_info))
     
     # 确保 token_info 返回的长度为4
     if len(token_info) != 4:
@@ -34,12 +35,13 @@ def api_query():
     
 @app.route('/api/renew', methods=['POST'])
 def api_renew():
+    new_print("api_renew")
     data = request.get_json()
     apikey = data.get('apikey')
     dollar = data.get('dollar')
     date = data.get('date')  # 假设日期格式为 2024年12月31日
 
-    print("Received renew request with API Key:", apikey, "Dollar:", dollar, "Date:", date)
+    new_print("Received renew request with API Key:", apikey, "Dollar:", dollar, "Date:", date)
 
     # 检查必要的参数是否提供
     if not apikey:
@@ -52,7 +54,7 @@ def api_renew():
     try:
         # 调用 change_token_dollar_and_life 函数
         result = change_token_dollar_and_life(driver, apikey, dollar, date)
-        print("Change token result:", result)
+        new_print("Change token result:", result)
 
         # 根据函数返回的结果，返回相应的消息
         if result == 1:
@@ -67,7 +69,7 @@ def api_renew():
             return jsonify({"error": "Unknown error", "status": 500}), 500
 
     except Exception as e:
-        print("Error occurred:", str(e))
+        new_print("Error occurred:", str(e))
         return jsonify({"error": "An error occurred while processing the renew request."}), 500
 
     
