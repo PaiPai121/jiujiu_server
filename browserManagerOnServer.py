@@ -7,6 +7,7 @@ import datetime
 import re
 import time
 import configparser
+import platform
 
 
 # 读取配置文件
@@ -17,7 +18,7 @@ username = config['selenium']['username']
 password = config['selenium']['password']
 coef = int(config['selenium']['counts_coef'])
 
-debug = True
+debug = not (platform.system() == "Linux")
 driver = None
 if debug:
     from selenium.webdriver.edge.service import Service
