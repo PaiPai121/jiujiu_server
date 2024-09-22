@@ -25,7 +25,7 @@ if debug:
     from selenium.webdriver.edge.options import Options
     # # 设置无头edge浏览器
     edge_options = Options()
-    # edge_options.add_argument("--headless")  # 无头模式
+    edge_options.add_argument("--headless")  # 无头模式
     edge_options.add_argument("--no-sandbox")  # 解决DevToolsActivePort文件不存在的报错
     edge_options.add_argument("--disable-dev-shm-usage")  # 共享内存
     edge_options.add_argument('--disable-gpu')  # 禁用GPU加速
@@ -350,6 +350,7 @@ def change_token_dollar_and_life(driver,dollor = 0,life = ["2024","十二月","3
         # 未找到
         return 4
     
+    new_print("查找三点button")
     # 等待按钮可点击
     wait = WebDriverWait(driver, 10)  # 最长等待10秒
     button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-hbyu9u')]")))
@@ -358,6 +359,7 @@ def change_token_dollar_and_life(driver,dollor = 0,life = ["2024","十二月","3
 
     time.sleep(0.5)
     
+    new_print("查找编辑菜单")
     # 等待并点击编辑菜单项，最多等待10秒
     edit_menu_item = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, "//li[contains(@class, 'MuiMenuItem-root') and text()='编辑']"))
@@ -375,6 +377,7 @@ def change_token_dollar_and_life(driver,dollor = 0,life = ["2024","十二月","3
         new_print("error")
         
     time.sleep(1)
+    new_print("查找提交button")
     # 等待并点击提交按钮，最多等待10秒
     submit_button = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'MuiButton-containedPrimary') and text()='提交']"))
