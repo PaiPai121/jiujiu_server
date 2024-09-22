@@ -41,7 +41,7 @@ def api_renew():
     dollar = data.get('dollar')
     date = data.get('date')  # 假设日期格式为 2024年12月31日
 
-    new_print("Received renew request with API Key:", apikey, "Dollar:", dollar, "Date:", date)
+    new_print("Received renew request with API Key:" + apikey+ " Dollar:"+ dollar+ " Date:"+ date)
 
     # 检查必要的参数是否提供
     if not apikey:
@@ -54,7 +54,7 @@ def api_renew():
     try:
         # 调用 change_token_dollar_and_life 函数
         result = change_token_dollar_and_life(driver, apikey, dollar, date)
-        new_print("Change token result:", result)
+        new_print("Change token result:"+ result)
 
         # 根据函数返回的结果，返回相应的消息
         if result == 1:
@@ -69,7 +69,7 @@ def api_renew():
             return jsonify({"error": "Unknown error", "status": 500}), 500
 
     except Exception as e:
-        new_print("Error occurred:", str(e))
+        new_print("Error occurred:"+ str(e))
         return jsonify({"error": "An error occurred while processing the renew request."}), 500
 
     
