@@ -1,11 +1,8 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
-# from selenium.webdriver.common.keys import Keys
 import datetime
 import re
 import time
@@ -20,17 +17,37 @@ username = config['selenium']['username']
 password = config['selenium']['password']
 coef = int(config['selenium']['counts_coef'])
 
-# # 设置无头chrome浏览器
-chrome_options = Options()
-chrome_options.add_argument("--headless")  # 无头模式
-chrome_options.add_argument("--no-sandbox")  # 解决DevToolsActivePort文件不存在的报错
-chrome_options.add_argument("--disable-dev-shm-usage")  # 共享内存
-chrome_options.add_argument('--disable-gpu')  # 禁用GPU加速
-chrome_options.add_argument('--window-size=2560,1080') 
+debug = True
+driver = None
+if debug:
+    from selenium.webdriver.edge.service import Service
+    from selenium.webdriver.edge.options import Options
+    # # 设置无头edge浏览器
+    edge_options = Options()
+    # edge_options.add_argument("--headless")  # 无头模式
+    edge_options.add_argument("--no-sandbox")  # 解决DevToolsActivePort文件不存在的报错
+    edge_options.add_argument("--disable-dev-shm-usage")  # 共享内存
+    edge_options.add_argument('--disable-gpu')  # 禁用GPU加速
+    edge_options.add_argument('--window-size=2560,1080') 
+    edge_options.binary_location = "/Applications/Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary"
 
-# 启动浏览器
-service = Service('/usr/local/bin/chromedriver')  # 替换为chromedriver的实际路径
-driver = webdriver.Chrome(service=service, options=chrome_options)
+    # 启动浏览器
+    service = Service('/Users/kzz6991/msedgedriver')  # 替换为edgedriver的实际路径
+    driver = webdriver.Edge(service=service, options=edge_options)
+else:
+    # # 设置无头chrome浏览器
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.chrome.options import Options
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # 无头模式
+    chrome_options.add_argument("--no-sandbox")  # 解决DevToolsActivePort文件不存在的报错
+    chrome_options.add_argument("--disable-dev-shm-usage")  # 共享内存
+    chrome_options.add_argument('--disable-gpu')  # 禁用GPU加速
+    chrome_options.add_argument('--window-size=2560,1080') 
+
+    # 启动浏览器
+    service = Service('/usr/local/bin/chromedriver')  # 替换为chromedriver的实际路径
+    driver = webdriver.Chrome(service=service, options=chrome_options)
 
 # 打开你想要测试的页面
 driver.get("https://api.wlai.vip/home")
@@ -181,11 +198,151 @@ def search_api(key):
     new_print("已点击搜索按钮。")
     
     time.sleep(1)
+    wait = WebDriverWait(driver, 5)
+    # 等待表格元素出现
+    table_container = wait.until(EC.visibility_of_element_located((By.CLASS_NAME, "MuiTableContainer-root")))
 
-def change_token_dollar_and_life(driver,dollor = 0,life = 0,key = "sk-Q4WYHTcuUZYR5qJ7Bc53EeB743A3494d916a4493CdEc380d"):
-    if (dollor == 0 and life == 0):
-        return
-    search_api(key)
+    new_print("table load finished")
+    # 获取所有表格行 <tr>，只从 <tbody> 中获取
+    rows = table_container.find_elements(By.XPATH, ".//tbody/tr")
+    if len(rows) == 0 or len(rows) > 1:
+        # 未找到
+        return False
+    else:
+        return True
+def check_data_after_now(date = ["2024","十二月","31","00","00"]):
+    months = {
+    "一月": 1, "二月": 2, "三月": 3, "四月": 4, "五月": 5,
+    "六月": 6, "七月": 7, "八月": 8, "九月": 9, "十月": 10,
+    "十一月": 11, "十二月": 12}
+    while len(date) < 5:
+        date.append("0")
+    # 提取年、月、日、时、分
+    year = int(date[0])
+    month = months[date[1]]
+    day = int(date[2])
+    hour = int(date[3])
+    minute = int(date[4])
+    # 创建 datetime 对象
+    given_date = datetime.datetime(year, month, day, hour, minute)
+
+    # 获取当前日期
+    current_date = datetime.datetime.now()
+    if given_date > current_date:
+        new_print("给定日期大于当前日期")
+        return True
+    else:
+        new_print("给定日期不大于当前日期")
+        return False
+    
+def change_key_life_time(life = ["2024","十二月","31","00","00"]):
+    if not check_data_after_now(life):
+        return False
+    # life 调整
+    # 等待日期选择器图标出现并点击
+    # 等待日期选择器按钮出现并点击
+    date_picker_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, "//button[@aria-label[contains(., 'Choose date')]]"))
+    )
+    date_picker_button.click()
+
+    # 等待日期选择器弹出，选择特定日期
+    # 这里假设我们要选择“2024年9月30日”
+    # 你需要根据实际的日期选择器结构进行调整
+    # 使用 WebDriverWait 等待显示月份的元素加载（最多等待10秒）
+    wait = WebDriverWait(driver, 10)
+    month_label = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiPickersCalendarHeader-label")))
+    # 根据空格进行分割
+    month, year = month_label.text.split()
+    # 循环直到当前月份与目标月份匹配
+    while not month == life[1]:
+        # 如果月份不匹配，点击“上一月”按钮
+        new_print(f"当前月份是 {month}，需要调整到 {life[1]}，点击上一月按钮。")
+        next_month_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Next month']")))
+        next_month_button.click()
+        month_label = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiPickersCalendarHeader-label")))
+        # 根据空格进行分割
+        month, year = month_label.text.split()
+    new_print("month checked")
+
+    # 定位日期所在的父容器
+    calendar_container = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.MuiDayCalendar-monthContainer")))
+
+    # 定位所有天数按钮
+    all_day_buttons = calendar_container.find_elements(By.CSS_SELECTOR, "button[role='gridcell']")
+
+    # 遍历所有日期，找到匹配的日期并点击
+    for button in all_day_buttons:
+        if button.text == life[2]:
+            print(f"找到日期：{life[2]}，即将点击。")
+            button.click()
+            break
+    else:
+        print(f"未找到匹配的日期：{life[2]}。")
+    # 等待并点击“OK”按钮
+    ok_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']")))
+    ok_button.click()
+    
+    # 创建一个等待对象
+    # wait = WebDriverWait(driver, 10)
+
+    # 选择小时为 "00"
+    hour_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@aria-label='0 hours']")))
+    hour_element.click()
+    print("选择小时 00 成功")
+
+    # 选择分钟为 "00"
+    minute_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@aria-label='0 minutes']")))
+    minute_element.click()
+    print("选择分钟 00 成功")
+
+    # 点击 "OK" 按钮
+    ok_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']")))
+    ok_button.click()
+    print("点击 OK 按钮成功")
+    return True
+
+def set_dollor(dollor):
+    if dollor < 0.5:
+        return False
+    # 等待金额输入框出现，最多等待10秒
+    amount_input = WebDriverWait(driver, 10).until(
+        EC.visibility_of_element_located((By.ID, "channel-remain_quota-label"))
+    )
+    
+    # 获取当前金额并加上 10
+    # current_value = int(amount_input.get_attribute("value"))
+    new_value = dollor
+    amount_input.click()
+    # 清空输入框并输入新的金额
+    amount_input.clear()
+    time.sleep(0.2)
+    # amount_input.send_keys(str(new_value))
+
+    driver.execute_script("arguments[0].value = arguments[1];", amount_input, str(new_value))
+    
+    new_print(f"已输入新的金额：{new_value}")
+    return True
+
+def change_token_dollar_and_life(driver,dollor = 0,life = ["2024","十二月","31","00","00"],key = "sk-Q4WYHTcuUZYR5qJ7Bc53EeB743A3494d916a4493CdEc380d"):
+    """
+    1: success
+    2: no dollar
+    3: no date
+    4: no key
+    """
+    # 检查输入
+    if (dollor < 0.5):
+        new_print("no dollar")
+        return 2
+    # 检查日期
+    if(not check_data_after_now(life)):
+        new_print("no date")
+        return 3
+    if not search_api(key):
+        # 未找到
+        return 4
+    
     # 等待按钮可点击
     wait = WebDriverWait(driver, 10)  # 最长等待10秒
     button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-hbyu9u')]")))
@@ -203,87 +360,12 @@ def change_token_dollar_and_life(driver,dollor = 0,life = 0,key = "sk-Q4WYHTcuUZ
     
     time.sleep(0.1)
     if not (dollor == 0):
-        # 等待金额输入框出现，最多等待10秒
-        amount_input = WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.ID, "channel-remain_quota-label"))
-        )
-        
-        # 获取当前金额并加上 10
-        # current_value = int(amount_input.get_attribute("value"))
-        new_value = dollor
-        amount_input.click()
-        # 清空输入框并输入新的金额
-        amount_input.clear()
-        time.sleep(0.2)
-        # amount_input.send_keys(str(new_value))
+        set_dollor(dollor)
 
-        driver.execute_script("arguments[0].value = arguments[1];", amount_input, str(new_value))
-        
-        new_print(f"已输入新的金额：{new_value}")
-
-    if  (life == 0):
-        # life 调整
-        # 等待日期选择器图标出现并点击
-        # 等待日期选择器按钮出现并点击
-        date_picker_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//button[@aria-label[contains(., 'Choose date')]]"))
-        )
-        date_picker_button.click()
-
-        # 等待日期选择器弹出，选择特定日期
-        # 这里假设我们要选择“2024年9月30日”
-        # 你需要根据实际的日期选择器结构进行调整
-        # 使用 WebDriverWait 等待显示月份的元素加载（最多等待10秒）
-        wait = WebDriverWait(driver, 10)
-        month_label = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiPickersCalendarHeader-label")))
-        # 根据空格进行分割
-        month, year = month_label.text.split()
-        # 循环直到当前月份与目标月份匹配
-        while not month == life[1]:
-            # 如果月份不匹配，点击“上一月”按钮
-            new_print(f"当前月份是 {month}，需要调整到 {life[1]}，点击上一月按钮。")
-            next_month_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Next month']")))
-            next_month_button.click()
-            month_label = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiPickersCalendarHeader-label")))
-            # 根据空格进行分割
-            month, year = month_label.text.split()
-        new_print("month checked")
-
-        # 定位日期所在的父容器
-        calendar_container = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.MuiDayCalendar-monthContainer")))
-
-        # 定位所有天数按钮
-        all_day_buttons = calendar_container.find_elements(By.CSS_SELECTOR, "button[role='gridcell']")
-
-        # 遍历所有日期，找到匹配的日期并点击
-        for button in all_day_buttons:
-            if button.text == life[2]:
-                print(f"找到日期：{life[2]}，即将点击。")
-                button.click()
-                break
-        else:
-            print(f"未找到匹配的日期：{life[2]}。")
-        # 等待并点击“OK”按钮
-        ok_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']")))
-        ok_button.click()
-        
-        # 创建一个等待对象
-        # wait = WebDriverWait(driver, 10)
-
-        # 选择小时为 "00"
-        hour_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@aria-label='0 hours']")))
-        hour_element.click()
-        print("选择小时 00 成功")
-
-        # 选择分钟为 "00"
-        minute_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@aria-label='0 minutes']")))
-        minute_element.click()
-        print("选择分钟 00 成功")
-
-        # 点击 "OK" 按钮
-        ok_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']")))
-        ok_button.click()
-        print("点击 OK 按钮成功")
+    if change_key_life_time(life):
+        new_print("life changed")
+    else:
+        new_print("error")
         
     time.sleep(1)
     # 等待并点击提交按钮，最多等待10秒
@@ -292,7 +374,7 @@ def change_token_dollar_and_life(driver,dollor = 0,life = 0,key = "sk-Q4WYHTcuUZ
     )
     submit_button.click()
     new_print("已点击提交按钮。")
-
+    return 1
 def get_token_info(driver,key = "sk-Q4WYHTcuUZYR5qJ7Bc53EeB743A3494d916a4493CdEc380d"):
     result = ["","","",""]
     search_api(key)
@@ -340,8 +422,94 @@ def get_token_info(driver,key = "sk-Q4WYHTcuUZYR5qJ7Bc53EeB743A3494d916a4493CdEc
     else:
         new_print("没有找到足够的行元素")
     return result
+
+def create_new_key(dollor,date):
+    if not check_data_after_now(date):
+        return False
+    if float(dollor) < 0.5:
+        return False
+    url = "https://api.wlai.vip/token"
+    driver.get(url)
+    time.sleep(0.5)
+    driver.refresh()
+    # 等待按钮可点击
+    wait = WebDriverWait(driver, 10)  # 最多等待10秒
+    button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'MuiButton-contained') and contains(., '新建令牌')]")))
+    # 点击按钮
+    button.click()
+    time.sleep(0.5)
+    # 等待输入框出现
+    wait = WebDriverWait(driver, 10)
+    input_box = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@id='channel-name-label']")))  # 根据实际的 ID 替换
+
+    # 获取当前时间
+    current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')  # 格式化时间
+    
+    # 填写当前时间
+    input_box.send_keys(current_time)
+    
+    # 等待下拉框出现并可点击
+    wait = WebDriverWait(driver, 10)
+    dropdown = wait.until(EC.element_to_be_clickable((By.ID, "models-multiple-select")))
+
+    # 点击下拉框
+    dropdown.click()
+    
+    # 等待复选框出现并可点击
+    # 等待 div 元素出现
+    wait = WebDriverWait(driver, 20)
+    combobox = wait.until(EC.visibility_of_element_located((By.ID, "group-select")))
+
+    # 使用 JavaScript 点击
+    driver.execute_script("arguments[0].click();", combobox)
+        
+    # 等待下拉框出现并可点击
+    wait = WebDriverWait(driver, 10)
+    dropdown = wait.until(EC.element_to_be_clickable((By.ID, "models-multiple-select")))
+
+    # 点击下拉框
+    dropdown.click()
+    
+    
+    
+    
+    # 等待下拉框出现并可点击
+    wait = WebDriverWait(driver, 10)
+    dropdown = wait.until(EC.element_to_be_clickable((By.ID, "group-select-label")))
+
+    # 点击下拉框
+    dropdown.click()
+    
+    # 等待复选框出现并可点击
+    wait = WebDriverWait(driver, 10)
+    checkbox = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input.PrivateSwitchBase-input")))
+
+    # 点击复选框
+    checkbox.click()
+    
+    # 等待下拉框出现并可点击
+    wait = WebDriverWait(driver, 10)
+    dropdown = wait.until(EC.element_to_be_clickable((By.ID, "group-select-label")))
+
+    # 点击下拉框
+    dropdown.click()
+    
+    set_dollor(dollor)
+    change_key_life_time(date)
+    time.sleep(1)
+    # 等待并点击提交按钮，最多等待10秒
+    submit_button = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'MuiButton-containedPrimary') and text()='提交']"))
+    )
+    submit_button.click()
+    new_print("已点击提交按钮。")
+    return True
+
+def pay_for_enlong():
+    pass
             
 login(driver)
+time.sleep(1)
 
 if __name__ == "__main__":
     pass
@@ -350,8 +518,9 @@ if __name__ == "__main__":
     # # change_token_dollar_and_life(driver,dollor=1) # 进行修改
     # key = "sk-Q4WYHTcuUZYR5qJ7Bc53EeB743A3494d916a4493CdEc380d"
     key = "123"
-    new_print(get_token_info(driver,key=key))
-    
+    # new_print(get_token_info(driver,key=key))
+    # print(change_token_dollar_and_life(driver,dollor=10,life=["2024","十二月","31","0","0"],key = key))
+    # create_new_key("123",["2024","十二月","31","00","00"])
     # change_token_dollar_and_life(driver,dollor=1,life=0,key = key)
 # finally:
 #     # 关闭浏览器
