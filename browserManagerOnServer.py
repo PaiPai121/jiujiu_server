@@ -243,7 +243,7 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
     # 等待日期选择器图标出现并点击
     # 等待日期选择器按钮出现并点击
     date_picker_button = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.XPATH, "//button[@aria-label[contains(., 'Choose date')]]"))
+        EC.element_to_be_clickable((By.XPATH, "//button[contains(@aria-label, 'Choose date')]"))
     )
     date_picker_button.click()
 
