@@ -268,12 +268,23 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
     driver.get_screenshot_as_file("screenshot.png")
     formatted_date = f"{year}/{month}/{day} {hour}:{minute}"
     input_box.send_keys(formatted_date)  # 输入日期
+    new_print("input")
     time.sleep(0.5)
     input_box.send_keys(formatted_date)  # 输入日期
+    new_print("input")
     time.sleep(0.5)
     input_box.send_keys(formatted_date)  # 输入日期
+    new_print("input")
     time.sleep(0.5)
     input_box.send_keys(formatted_date)  # 输入日期
+    new_print("input")
+    # 检查当前文本
+    current_value = input_box.get_attribute('value')
+    if current_value == input_text:
+        print("输入成功，当前文本为:", current_value)
+    else:
+        print("输入失败，当前文本为:", current_value)
+    
     return True
 
 def set_dollor(dollor):
