@@ -25,7 +25,7 @@ if debug:
     from selenium.webdriver.edge.options import Options
     # # 设置无头edge浏览器
     edge_options = Options()
-    edge_options.add_argument("--headless")  # 无头模式
+    # edge_options.add_argument("--headless")  # 无头模式
     edge_options.add_argument("--no-sandbox")  # 解决DevToolsActivePort文件不存在的报错
     edge_options.add_argument("--disable-dev-shm-usage")  # 共享内存
     edge_options.add_argument('--disable-gpu')  # 禁用GPU加速
@@ -257,6 +257,18 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
     # 根据空格进行分割
     month, year = month_label.text.split()
     new_print("month : " + str(month) + " year :" + str(year))
+    if not (year == life[0]):
+        new_print("set year")
+        # 设置年份
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='calendar view is open, switch to year view']"))
+        ).click()
+        
+        print("修改年份")
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), '" + life[0] + "')]"))
+            ).click()
+    
     # 循环直到当前月份与目标月份匹配
     while not month == life[1]:
         # 如果月份不匹配，点击“上一月”按钮
@@ -289,15 +301,15 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
     # 创建一个等待对象
     # wait = WebDriverWait(driver, 10)
 
-    # 选择小时为 "00"
-    hour_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@aria-label='0 hours']")))
-    hour_element.click()
-    print("选择小时 00 成功")
+    # # 选择小时为 "00"
+    # hour_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@aria-label='0 hours']")))
+    # hour_element.click()
+    # print("选择小时 00 成功")
 
-    # 选择分钟为 "00"
-    minute_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@aria-label='0 minutes']")))
-    minute_element.click()
-    print("选择分钟 00 成功")
+    # # 选择分钟为 "00"
+    # minute_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@aria-label='0 minutes']")))
+    # minute_element.click()
+    # print("选择分钟 00 成功")
 
     # 点击 "OK" 按钮
     ok_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']")))
@@ -528,10 +540,10 @@ if __name__ == "__main__":
     # login(driver) # 登陆
     # get_balance(driver)
     # # change_token_dollar_and_life(driver,dollor=1) # 进行修改
-    # key = "sk-Q4WYHTcuUZYR5qJ7Bc53EeB743A3494d916a4493CdEc380d"
-    key = "123"
+    key = "sk-Q4WYHTcuUZYR5qJ7Bc53EeB743A3494d916a4493CdEc380d"
+    # key = "123"
     # new_print(get_token_info(driver,key=key))
-    # print(change_token_dollar_and_life(driver,dollor=10,life=["2024","十二月","31","0","0"],key = key))
+    print(change_token_dollar_and_life(driver,dollor=10,life=["2024","十二月","31","0","0"],key = key))
     # create_new_key("123",["2024","十二月","31","00","00"])
     # change_token_dollar_and_life(driver,dollor=1,life=0,key = key)
 # finally:
