@@ -25,7 +25,7 @@ if debug:
     from selenium.webdriver.edge.options import Options
     # # 设置无头edge浏览器
     edge_options = Options()
-    # edge_options.add_argument("--headless")  # 无头模式
+    edge_options.add_argument("--headless")  # 无头模式
     edge_options.add_argument("--no-sandbox")  # 解决DevToolsActivePort文件不存在的报错
     edge_options.add_argument("--disable-dev-shm-usage")  # 共享内存
     edge_options.add_argument('--disable-gpu')  # 禁用GPU加速
@@ -240,22 +240,9 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
     if not check_data_after_now(life):
         return False
     # life 调整
-    # 等待日期选择器按钮出现并点击
     wait = WebDriverWait(driver, 10)
-    # date_picker_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "div.MuiInputAdornment-root button[aria-label*='Choose date']")))
-    # date_picker_button.click()
     # 等待输入框可见并选择它
     input_box = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiInputBase-root input[placeholder='YYYY/MM/DD hh:mm']")))
-    # 激活浏览器窗口
-    
-    # input_box.click()  # 点击输入框
-    
-    # time.sleep(0.5)
-    # driver.switch_to.window(driver.current_window_handle)
-    # input_box.clear()   # 清空输入框
-    # time.sleep(0.5)
-    
-        # 定义一个字典将中文月份转换为数字
     month_mapping = {
         "一月": "01",
         "二月": "02",
@@ -277,7 +264,8 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
     day = life[2]
     hour = life[3]
     minute = life[4]
-
+    # 保存截图
+    driver.get_screenshot_as_file("screenshot.png")
     formatted_date = f"{year}/{month}/{day} {hour}:{minute}"
     input_box.send_keys(formatted_date)  # 输入日期
     time.sleep(0.5)
@@ -286,81 +274,6 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
     input_box.send_keys(formatted_date)  # 输入日期
     time.sleep(0.5)
     input_box.send_keys(formatted_date)  # 输入日期
-    # # 等待日期选择器弹出，选择特定日期
-    # # 这里假设我们要选择“2024年9月30日”
-    # # 你需要根据实际的日期选择器结构进行调整
-    # # 使用 WebDriverWait 等待显示月份的元素加载（最多等待10秒）
-    # new_print("find CalendarHeader")
-    # wait = WebDriverWait(driver, 10)
-    # month_label = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiPickersCalendarHeader-label")))
-    # # 根据空格进行分割
-    # month, year = month_label.text.split()
-    # new_print("month : " + str(month) + " year :" + str(year))
-    # if not (year == life[0]):
-    #     new_print("set year")
-    #     # 设置年份
-    #     WebDriverWait(driver, 10).until(
-    #         EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='calendar view is open, switch to year view']"))
-    #     ).click()
-        
-    #     print("修改年份")
-    #     WebDriverWait(driver, 10).until(
-    #         EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), '" + life[0] + "')]"))
-    #         ).click()
-    
-    # # 循环直到当前月份与目标月份匹配
-    # while not month == life[1]:
-    #     # 如果月份不匹配，点击“上一月”按钮
-    #     if month < life[1]:
-    #         # 如果当前月份小于目标月份，点击“下一月”按钮
-    #         new_print(f"当前月份是 {month}，需要调整到 {life[0]}，点击下一月按钮。")
-    #         next_month_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Next month']")))
-    #         next_month_button.click()
-    #     else:
-    #         # 如果当前月份大于目标月份，点击“上一月”按钮
-    #         new_print(f"当前月份是 {month}，需要调整到 {life[0]}，点击上一月按钮。")
-    #         previous_month_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Previous month']")))
-    #         previous_month_button.click()
-    #     month_label = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiPickersCalendarHeader-label")))
-    #     # 根据空格进行分割
-    #     month, year = month_label.text.split()
-    # new_print("month checked")
-
-    # # 定位日期所在的父容器
-    # calendar_container = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.MuiDayCalendar-monthContainer")))
-
-    # # 定位所有天数按钮
-    # all_day_buttons = calendar_container.find_elements(By.CSS_SELECTOR, "button[role='gridcell']")
-
-    # # 遍历所有日期，找到匹配的日期并点击
-    # for button in all_day_buttons:
-    #     if button.text == life[2]:
-    #         print(f"找到日期：{life[2]}，即将点击。")
-    #         button.click()
-    #         break
-    # else:
-    #     print(f"未找到匹配的日期：{life[2]}。")
-    # 等待并点击“OK”按钮
-    # ok_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']")))
-    # ok_button.click()
-    
-    # 创建一个等待对象
-    # wait = WebDriverWait(driver, 10)
-
-    # # 选择小时为 "00"
-    # hour_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@aria-label='0 hours']")))
-    # hour_element.click()
-    # print("选择小时 00 成功")
-
-    # # 选择分钟为 "00"
-    # minute_element = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@aria-label='0 minutes']")))
-    # minute_element.click()
-    # print("选择分钟 00 成功")
-
-    # 点击 "OK" 按钮
-    # ok_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']")))
-    # ok_button.click()
-    # print("点击 OK 按钮成功")
     return True
 
 def set_dollor(dollor):
