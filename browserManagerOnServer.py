@@ -12,7 +12,7 @@ import platform
 # 读取配置文件
 config = configparser.ConfigParser()
 config.read('config.ini')
-
+# user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0"
 username = config['selenium']['username']
 password = config['selenium']['password']
 coef = int(config['selenium']['counts_coef'])
@@ -40,6 +40,7 @@ else:
     from selenium.webdriver.chrome.service import Service
     from selenium.webdriver.chrome.options import Options
     chrome_options = Options()
+    # chrome_options.add_argument("user-agent=" + user_agent)
     chrome_options.add_argument("--headless")  # 无头模式
     chrome_options.add_argument("--no-sandbox")  # 解决DevToolsActivePort文件不存在的报错
     chrome_options.add_argument("--disable-dev-shm-usage")  # 共享内存
@@ -49,6 +50,7 @@ else:
     # 启动浏览器
     service = Service('/usr/local/bin/chromedriver')  # 替换为chromedriver的实际路径
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    print(driver.execute_script("return navigator.userAgent;"))
 
 # 打开你想要测试的页面
 driver.get("https://api.wlai.vip/home")
@@ -264,23 +266,45 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
     day = life[2]
     hour = life[3]
     minute = life[4]
-    # 保存截图
-    driver.get_screenshot_as_file("screenshot.png")
     formatted_date = f"{year}/{month}/{day} {hour}:{minute}"
-    input_box.send_keys(formatted_date)  # 输入日期
-    new_print("input")
-    time.sleep(0.5)
-    input_box.send_keys(formatted_date)  # 输入日期
-    new_print("input")
-    time.sleep(0.5)
-    input_box.send_keys(formatted_date)  # 输入日期
-    new_print("input")
-    time.sleep(0.5)
-    input_box.send_keys(formatted_date)  # 输入日期
-    new_print("input")
+    if True:
+        input_box.send_keys(formatted_date)  # 输入日期
+        new_print("input")
+        # 保存截图
+        driver.get_screenshot_as_file("screenshot.png")
+        time.sleep(0.5)
+        input_box.send_keys(formatted_date)  # 输入日期
+        new_print("input")
+        time.sleep(0.5)
+        input_box.send_keys(formatted_date)  # 输入日期
+        new_print("input")
+        time.sleep(0.5)
+        input_box.send_keys(formatted_date)  # 输入日期
+        new_print("input")
+    else:
+        time.sleep(0.5)
+        input_box.send_keys(formatted_date) # 其实是打开日期选择器
+        new_print("find CalendarHeader")
+        wait = WebDriverWait(driver, 10)
+        month_label = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiPickersCalendarHeader-label")))
+        # 根据空格进行分割
+        month, year = month_label.text.split()
+        new_print("month : " + str(month) + " year :" + str(year))
+        if not (year == life[0]):
+            new_print("set year")
+            # 设置年份
+            WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='calendar view is open, switch to year view']"))
+            ).click()
+            
+            print("修改年份")
+            WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), '" + life[0] + "')]"))
+                ).click()
+    
     # 检查当前文本
     current_value = input_box.get_attribute('value')
-    if current_value == input_text:
+    if current_value == formatted_date:
         print("输入成功，当前文本为:", current_value)
     else:
         print("输入失败，当前文本为:", current_value)
@@ -353,12 +377,13 @@ def change_token_dollar_and_life(driver,dollor = 0,life = ["2024","十二月","3
     
     time.sleep(0.1)
     if not (dollor == 0):
+        # 设置金额
         set_dollor(dollor)
 
-    if change_key_life_time(life):
-        new_print("life changed")
-    else:
-        new_print("error")
+    # if change_key_life_time(life):
+    #     new_print("life changed")
+    # else:
+    #     new_print("error")
         
     time.sleep(1)
     new_print("查找提交button")
