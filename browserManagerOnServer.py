@@ -269,7 +269,7 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
     hour = life[3]
     minute = life[4]
     formatted_date = f"{year}/{month}/{day} {hour}:{minute}"
-    if True:
+    if debug:
         input_box.send_keys(formatted_date)  # 输入日期
         new_print("input")
         # 保存截图
@@ -287,6 +287,7 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
         time.sleep(0.5)
         input_box.send_keys(formatted_date) # 其实是打开日期选择器
         new_print("find CalendarHeader")
+        time.sleep(0.1)
         wait = WebDriverWait(driver, 10)
         month_label = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiPickersCalendarHeader-label")))
         # 根据空格进行分割
@@ -303,15 +304,49 @@ def change_key_life_time(life = ["2024","十二月","31","00","00"]):
             WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), '" + life[0] + "')]"))
                 ).click()
-    
+        # if not (month == life[1]):
+            # 循环直到当前月份与目标月份匹配
+        while not month == life[1]:
+            # 如果月份不匹配，点击“上一月”按钮
+            if int(month_mapping[month]) < int(month_mapping[life[1]]):
+                new_print(f"当前月份是 {month}，需要调整到 {life[1]}，点击下一月按钮。")
+                next_month_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Next month']")))
+                next_month_button.click()
+            if int(month_mapping[month]) > int(month_mapping[life[1]]):
+                new_print(f"当前月份是 {month}，需要调整到 {life[1]}，点击上一月按钮。")
+                next_month_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[title='Previous month']")))
+                next_month_button.click()
+            month_label = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div.MuiPickersCalendarHeader-label")))
+            # 根据空格进行分割
+            month, year = month_label.text.split()
+        new_print("month checked")
+        
+        # 定位日期所在的父容器
+        calendar_container = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.MuiDayCalendar-monthContainer")))
+
+        # 定位所有天数按钮
+        all_day_buttons = calendar_container.find_elements(By.CSS_SELECTOR, "button[role='gridcell']")
+
+        # 遍历所有日期，找到匹配的日期并点击
+        for button in all_day_buttons:
+            if button.text == life[2]:
+                print(f"找到日期：{life[2]}，即将点击。")
+                button.click()
+                break
+        else:
+            print(f"未找到匹配的日期：{life[2]}。")
+            
     # 检查当前文本
     current_value = input_box.get_attribute('value')
     if current_value == formatted_date:
         print("输入成功，当前文本为:", current_value)
     else:
         print("输入失败，当前文本为:", current_value)
-    
-    return True
+        # return False
+        # 等待并点击“OK”按钮
+    ok_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']")))
+    ok_button.click()
+    return current_value == formatted_date
 
 def set_dollor(dollor):
     if dollor < 0.5:
@@ -327,12 +362,12 @@ def set_dollor(dollor):
     amount_input.click()
     # 清空输入框并输入新的金额
     # amount_input.clear()
-    for i in range(5):
+    for i in range(len(amount_input.text) + 1):
         amount_input.send_keys(Keys.BACKSPACE)
         time.sleep(0.2)
-    # amount_input.send_keys(str(new_value))
+    amount_input.send_keys(str(new_value))
 
-    driver.execute_script("arguments[0].value = arguments[1];", amount_input, str(new_value))
+    # driver.execute_script("arguments[0].value = arguments[1];", amount_input, str(new_value))
     
     new_print(f"已输入新的金额：{new_value}")
     return True
@@ -346,18 +381,19 @@ def change_token_dollar_and_life(driver,dollor = 0,life = ["2024","十二月","3
     """
     # 检查输入
     try:
-        if (dollor < 0.5):
+        if ( 0 < dollor < 0.5):
             new_print("no dollar")
             return 2
     except:
         dollor = float(dollor)
-        if (dollor < 0.5):
+        if ( 0 < dollor < 0.5):
             new_print("no dollar")
             return 2
     # 检查日期
-    if(not check_data_after_now(life)):
-        new_print("no date")
-        return 3
+    if(len(life) > 0)
+        if(not check_data_after_now(life)):
+            new_print("no date")
+            return 3
     if not search_api(key):
         # 未找到
         return 4
@@ -380,14 +416,14 @@ def change_token_dollar_and_life(driver,dollor = 0,life = ["2024","十二月","3
     new_print("已点击编辑菜单项。")
     
     time.sleep(0.1)
-    if not (dollor == 0):
+    if dollor >= 0:
         # 设置金额
         set_dollor(dollor)
-
-    # if change_key_life_time(life):
-    #     new_print("life changed")
-    # else:
-    #     new_print("error")
+    if len(life) > 0:
+        if change_key_life_time(life):
+            new_print("life changed")
+        else:
+            new_print("error")
         
     time.sleep(1)
     new_print("查找提交button")
@@ -542,7 +578,7 @@ if __name__ == "__main__":
     key = "sk-Q4WYHTcuUZYR5qJ7Bc53EeB743A3494d916a4493CdEc380d"
     # key = "123"
     # new_print(get_token_info(driver,key=key))
-    print(change_token_dollar_and_life(driver,dollor=10,life=["2024","十二月","31","0","0"],key = key))
+    print(change_token_dollar_and_life(driver,dollor=10,life=["2026","六月","15","0","0"],key = key))
     # create_new_key("123",["2024","十二月","31","00","00"])
     # change_token_dollar_and_life(driver,dollor=1,life=0,key = key)
 # finally:

@@ -103,7 +103,52 @@ def api_renew():
         new_print("Error occurred:"+ str(e))
         return jsonify({"error": "An error occurred while processing the renew request."}), 500
 
-    
+
+
+@app.route('/api/enlongkey', methods=['POST'])
+def enlongkey():
+    new_print("enlongkey")
+    data = request.get_json()
+    apikey = data.get('apikey')
+    new_print("key:" + apikey)
+    try:
+        _,_,_,expire_time = get_token_info(driver,apikey)
+        # 将字符串转换为日期对象
+        input_date = datetime.strptime(expire_time, '%Y-%m-%d %H:%M:%S')
+        
+        # 给月份加一，处理年份进位
+        if input_date.month == 12:
+            new_date = input_date.replace(year=input_date.year + 1, month=1, day=1)
+        else:
+            new_date = input_date.replace(month=input_date.month + 1)
+        output = [
+            str(new_date.year),
+            new_date.strftime('%B'),  # 获取完整的英文月份名称
+            str(new_date.day),
+            str(new_date.hour),
+            str(new_date.minute)
+        ]
+        change_token_dollar_and_life(driver,dollor=-1,life=output,key = apikey)
+        new_print("change life success")
+        return jsonify({"message": "Success", "status": 1})
+    except Exception as e:
+        new_print("Error occurred:"+ str(e))
+        return jsonify({"error": "An error occurred while processing the enlongkey request."}), 500
+
+@app.route('/api/moremoney', methods=['POST'])
+def moremoney():
+    new_print("moremoney")
+    data = request.get_json()
+    apikey = data.get('apikey')
+    new_print("key:" + apikey)
+    try:
+        # _,_,_,expire_time = get_token_info(driver,apikey)
+        change_token_dollar_and_life(driver,dollor=5,life=[],key = apikey)
+        new_print("change dollor success")
+        return jsonify({"message": "Success", "status": 1})
+    except Exception as e:
+        new_print("Error occurred:"+ str(e))
+        return jsonify({"error": "An error occurred while processing the moremoney request."}), 500
     
 if __name__ == '__main__':
     app.run(debug=True)
