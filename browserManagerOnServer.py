@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 import datetime
 import re
 import time
@@ -12,7 +13,8 @@ import platform
 # 读取配置文件
 config = configparser.ConfigParser()
 config.read('config.ini')
-# user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0"
+
+user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
 username = config['selenium']['username']
 password = config['selenium']['password']
 coef = int(config['selenium']['counts_coef'])
@@ -40,7 +42,7 @@ else:
     from selenium.webdriver.chrome.service import Service
     from selenium.webdriver.chrome.options import Options
     chrome_options = Options()
-    # chrome_options.add_argument("user-agent=" + user_agent)
+    chrome_options.add_argument("user-agent=" + user_agent)
     chrome_options.add_argument("--headless")  # 无头模式
     chrome_options.add_argument("--no-sandbox")  # 解决DevToolsActivePort文件不存在的报错
     chrome_options.add_argument("--disable-dev-shm-usage")  # 共享内存
@@ -324,8 +326,10 @@ def set_dollor(dollor):
     new_value = dollor
     amount_input.click()
     # 清空输入框并输入新的金额
-    amount_input.clear()
-    time.sleep(0.2)
+    # amount_input.clear()
+    for i in range(5):
+        amount_input.send_keys(Keys.BACKSPACE)
+        time.sleep(0.2)
     # amount_input.send_keys(str(new_value))
 
     driver.execute_script("arguments[0].value = arguments[1];", amount_input, str(new_value))
