@@ -390,7 +390,7 @@ def change_token_dollar_and_life(driver,dollor = 0,life = ["2024","十二月","3
             new_print("no dollar")
             return 2
     # 检查日期
-    if(len(life) > 0)
+    if(len(life) > 0):
         if(not check_data_after_now(life)):
             new_print("no date")
             return 3
