@@ -114,7 +114,7 @@ def enlongkey():
     try:
         _,_,_,expire_time = get_token_info(driver,apikey)
         # 将字符串转换为日期对象
-        input_date = datetime.strptime(expire_time, '%Y-%m-%d %H:%M:%S')
+        input_date = datetime.datetime.strptime(expire_time, '%Y-%m-%d %H:%M:%S')
         new_print("current time :" + str(new_date.year), str(new_date.month) + str(new_date.day))
         # 给月份加一，处理年份进位
         if input_date.month == 12:
