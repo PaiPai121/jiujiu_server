@@ -2,8 +2,16 @@ from flask import Flask, request, jsonify
 from browserManagerOnServer import *
 from flask_cors import CORS
 
+ALLOWED_IPS = ["1.94.120.213"]
+
+
 app = Flask(__name__)
 CORS(app)
+
+@app.before_request
+def limit_remote_addr():
+    if request.remote_addr not in ALLOWED_IPS:
+        return jsonify({"error": "Access denied."}), 403
 
 @app.route('/api/query', methods=['POST'])
 def api_query():
@@ -115,7 +123,7 @@ def enlongkey():
         _,_,_,expire_time = get_token_info(driver,apikey)
         # 将字符串转换为日期对象
         input_date = datetime.datetime.strptime(expire_time, '%Y-%m-%d %H:%M:%S')
-        new_print("current time :" + str(new_date.year), str(new_date.month) + str(new_date.day))
+        new_print("current time :" + str(input_date.year) + str(input_date.month) + str(input_date.day))
         # 给月份加一，处理年份进位
         if input_date.month == 12:
             new_date = input_date.replace(year=input_date.year + 1, month=1, day=1)
@@ -128,7 +136,7 @@ def enlongkey():
         }
 
         # 获取月份并转换为汉字
-        month_in_chinese = month_map[input_date.month] + '月'
+        month_in_chinese = month_map[new_date.month] + '月'
         # 给月份加一，处理年份进位
         output = [
             str(new_date.year),
