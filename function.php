@@ -40,6 +40,8 @@ function send_order_details_to_email($order_id) {
     // 获取订单中的商品信息
     $message .= '商品信息：' . PHP_EOL;
     foreach ($order->get_items() as $item_id => $item) {
+        $product_id = $item->get_product_id();
+        $message .= '商品ID: ' . $product_id . PHP_EOL;
         $product_name = $item->get_name();
         $quantity = $item->get_quantity();
         $message .= $product_name . ' x ' . $quantity . PHP_EOL;
@@ -61,10 +63,28 @@ function send_order_details_to_email($order_id) {
             $message .= 'API Key: 未找到' . PHP_EOL; // 添加调试信息
         }
     }
-	// 添加调试信息
-    // $meta_data = $order->get_meta_data();
-    // $message .= '元数据: ' . print_r($meta_data, true) . PHP_EOL;
 
+    switch ($product_id) {
+        case 71: // 假设产品 ID 为 71 的商品需要发出特定请求
+            $api_url = 'http://1.94.120.213:5000/api/enlongkey';
+            break;
+        case 111: // 假设产品 ID 为 72 的商品需要发出另一个请求
+            $api_url = 'http://1.94.120.213:5000/api/moremoney';
+            break;
+        // 可以添加更多商品 ID 和相应的请求逻辑
+        default:
+            break;// 如果没有匹配的商品 ID，则跳过该商品   
+    }
+
+    // 发送请求
+    $response = wp_remote_post($api_url, array(
+        'method'    => 'POST',
+        'body'      => json_encode(array(
+            'apikey' => $api_key,
+            'quantity' => $quantity, // 如果需要传递数量
+        )),
+        'headers'   => array('Content-Type' => 'application/json'),
+    ));
 
     // 设置邮件头部
     $headers = array('Content-Type: text/plain; charset=UTF-8');
@@ -123,16 +143,6 @@ function send_order_details_to_email($order_id) {
                 $message .= '截止日期: ' . $query_data['expiration_date'] . PHP_EOL;
             }
         }
-		
-		
-		
-//         // 处理响应（可选）
-//         if (is_wp_error($response)) {
-//             $error_message = $response->get_error_message();
-//             new_print("Error occurred while requesting /api/renew: " . $error_message);
-//         } else {
-//             new_print("Successfully requested /api/renew. Response: " . wp_remote_retrieve_body($response));
-//         }
 	}
 	
 }

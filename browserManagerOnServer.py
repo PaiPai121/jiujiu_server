@@ -362,9 +362,11 @@ def set_dollor(dollor):
     amount_input.click()
     # 清空输入框并输入新的金额
     # amount_input.clear()
+    time.sleep(0.1)
     for i in range(len(amount_input.text) + 1):
         amount_input.send_keys(Keys.BACKSPACE)
-        time.sleep(0.2)
+        time.sleep(0.1)
+        new_print("current value: "+amount_input.text)
     amount_input.send_keys(str(new_value))
 
     # driver.execute_script("arguments[0].value = arguments[1];", amount_input, str(new_value))

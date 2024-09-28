@@ -115,19 +115,28 @@ def enlongkey():
         _,_,_,expire_time = get_token_info(driver,apikey)
         # 将字符串转换为日期对象
         input_date = datetime.strptime(expire_time, '%Y-%m-%d %H:%M:%S')
-        
+        new_print("current time :" + str(new_date.year), str(new_date.month) + str(new_date.day))
         # 给月份加一，处理年份进位
         if input_date.month == 12:
             new_date = input_date.replace(year=input_date.year + 1, month=1, day=1)
         else:
             new_date = input_date.replace(month=input_date.month + 1)
+        # 月份映射字典
+        month_map = {
+            1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六',
+            7: '七', 8: '八', 9: '九', 10: '十', 11: '十一', 12: '十二'
+        }
+
+        # 获取月份并转换为汉字
+        month_in_chinese = month_map[input_date.month] + '月'
         output = [
             str(new_date.year),
-            new_date.strftime('%B'),  # 获取完整的英文月份名称
+            month_in_chinese,  # 获取完整的月份名称
             str(new_date.day),
             str(new_date.hour),
             str(new_date.minute)
         ]
+        new_print("target data = "+output[0]+"-"+output[1]+"-"+output[2])
         change_token_dollar_and_life(driver,dollor=-1,life=output,key = apikey)
         new_print("change life success")
         return jsonify({"message": "Success", "status": 1})
